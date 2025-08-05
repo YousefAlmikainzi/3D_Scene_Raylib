@@ -40,6 +40,9 @@ int main(void)
     };
     //3D stuff
     //Loading Texture and Shading
+    
+    Shader skyboxShader = LoadShader("skybox.vs", "Try2.fs");
+    
     char* ftPic = "textures/skybox/ft.jpg";
     char* bkPic = "textures/skybox/bk.jpg";
     char* upPic = "textures/skybox/up.jpg";
@@ -55,51 +58,60 @@ int main(void)
     Texture2D lfTexture = LoadTexture(lfPic);
     
     Model cube = LoadModelFromMesh(GenMeshCube(1.0f, 1.0f, 1.0f));
-    Shader skyboxShader = LoadShader("skybox.vs", "skybox.fs");
     
-    SetShaderValueTexture(skyboxShader, GetShaderLocation(skyboxShader, "texture0"), ftTexture);
-    SetShaderValueTexture(skyboxShader, GetShaderLocation(skyboxShader, "texture1"), bkTexture);
-    SetShaderValueTexture(skyboxShader, GetShaderLocation(skyboxShader, "texture2"), upTexture);
-    SetShaderValueTexture(skyboxShader, GetShaderLocation(skyboxShader, "texture3"), dnTexture);
-    SetShaderValueTexture(skyboxShader, GetShaderLocation(skyboxShader, "texture4"), rtTexture);
-    SetShaderValueTexture(skyboxShader, GetShaderLocation(skyboxShader, "texture5"), lfTexture);
-    
-    printf("Cube has %d mats\n", cube.materialCount);
     cube.materials[0].shader = skyboxShader;
-
+    
+    int floc = GetShaderLocation(skyboxShader, "Front");
+    int bloc = GetShaderLocation(skyboxShader, "Back");
+    int uloc = GetShaderLocation(skyboxShader, "Up");
+    int dloc = GetShaderLocation(skyboxShader, "Down");
+    int rloc = GetShaderLocation(skyboxShader, "Right");
+    int lloc = GetShaderLocation(skyboxShader, "Left");
+    
+    printf("floc %d\n", floc);
+    printf("bloc %d\n", bloc);
+    printf("uloc %d\n", uloc);
+    printf("dloc %d\n", dloc);
+    printf("rloc %d\n", rloc);
+    printf("lloc %d\n", lloc);
+    
+    for(int i = 0 ; i < RL_MAX_SHADER_LOCATIONS ; i++)
+    {
+        if(skyboxShader.locs[i] != -1)
+            printf("SHADER LOC AT %d = %d\n", i, skyboxShader.locs[i]);
+    }
+    printf("POSITION LOC %d\n", skyboxShader.locs[SHADER_LOC_VERTEX_POSITION]);
+    printf("TEXCOORD1 LOC %d\n", skyboxShader.locs[SHADER_LOC_VERTEX_TEXCOORD01]);
+    printf("NORMAL LOC %d\n", skyboxShader.locs[SHADER_LOC_VERTEX_NORMAL]);
+    
+    DisableCursor();
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
         BeginMode3D(camera);
             UpdateCamera(&camera, CAMERA_FREE);
             DrawCube((Vector3){10, 0, 10}, 10, 10, 10, YELLOW);
+            
             rlDisableBackfaceCulling();
-            DrawModel(cube, (Vector3){0,0,0}, 1000.0f, WHITE);
+            
+            SetShaderValueTexture(skyboxShader, floc, ftTexture);
+            SetShaderValueTexture(skyboxShader, bloc, bkTexture);
+
+            SetShaderValueTexture(skyboxShader, rloc, rtTexture);
+            SetShaderValueTexture(skyboxShader, lloc, lfTexture);
+
+            SetShaderValueTexture(skyboxShader, uloc, upTexture);
+            SetShaderValueTexture(skyboxShader, dloc, dnTexture);
+
+            DrawModel(cube, (Vector3){0,0,0}, 10.0f, WHITE);
             rlEnableBackfaceCulling();
         EndMode3D();
         
-        //all 2D stuff
-        if(IsKeyDown(KEY_SPACE))
-        {
-            see2d = true;
-        } else if(IsKeyDown(KEY_P))
-        {
-            see2d = false;
-        }
-        if(see2d)
-        {
-            DrawCircle(playerMovement.x, playerMovement.y, 20, BLUE);
-            Grid();
-            DrawTriangle((Vector2){((float)SCREEN_SIZE/10) * 5,((float)SCREEN_SIZE/10) * 4}, (Vector2){((float)SCREEN_SIZE/10) * 5,((float)SCREEN_SIZE/10) * 5}, (Vector2){((float)SCREEN_SIZE/10) * 6,((float)SCREEN_SIZE/10) * 5}, (Color){75,75,75,255});
-            DrawTriangle((Vector2){((float)SCREEN_SIZE/10) * 5,((float)SCREEN_SIZE/10) * 6}, (Vector2){((float)SCREEN_SIZE/10) * 5,((float)SCREEN_SIZE/10) * 5}, (Vector2){((float)SCREEN_SIZE/10) * 4,((float)SCREEN_SIZE/10) * 5}, (Color){15,15,15,255});
-            DrawTriangle((Vector2){((float)SCREEN_SIZE/10) * 4,((float)SCREEN_SIZE/10) * 5}, (Vector2){((float)SCREEN_SIZE/10) * 5,((float)SCREEN_SIZE/10) * 5}, (Vector2){((float)SCREEN_SIZE/10) * 5,((float)SCREEN_SIZE/10) * 4}, (Color){50,50,50,255});
-            DrawTriangle((Vector2){((float)SCREEN_SIZE/10) * 6,((float)SCREEN_SIZE/10) * 5}, (Vector2){((float)SCREEN_SIZE/10) * 5,((float)SCREEN_SIZE/10) * 5}, (Vector2){((float)SCREEN_SIZE/10) * 5,((float)SCREEN_SIZE/10) * 6}, (Color){25,25,25,255});
-            Control();
-        }
         EndDrawing();
     }
+    
     UnloadTexture(ftTexture);
-    UnloadTexture(dnTexture);
+    UnloadTexture(bkTexture);
     UnloadTexture(upTexture);
     UnloadTexture(dnTexture);
     UnloadTexture(rtTexture);
@@ -108,39 +120,4 @@ int main(void)
     UnloadModel(cube);
     CloseWindow();
     return 0;
-}
-
-void Grid()
-{
-    for(int i = 0; i <= SCREEN_SIZE/100; i++)
-    {
-        if(i == 5)
-        {
-            DrawLineEx((VectorPoint){.point={(float)SCREEN_SIZE/10 * i, 0}}.vector, (Vector2){(float)SCREEN_SIZE/10 * i, SCREEN_SIZE}, 3, RED);
-            DrawLineEx((Vector2){0, (float)SCREEN_SIZE/10 * i}, (Vector2){SCREEN_SIZE, (float)SCREEN_SIZE/10 * i}, 3, RED);
-            continue;
-        }
-        DrawLineEx((Vector2){(float)SCREEN_SIZE/10 * i, 0}, (Vector2){(float)SCREEN_SIZE/10 * i, SCREEN_SIZE}, 1, RED);
-        DrawLineEx((Vector2){0, (float)SCREEN_SIZE/10 * i}, (Vector2){SCREEN_SIZE, (float)SCREEN_SIZE/10 * i}, 1, RED);
-    }
-}
-
-void Control()
-{
-    if(IsKeyDown(KEY_W))
-    {
-        playerMovement.y -= speed * GetFrameTime();
-    }
-    if(IsKeyDown(KEY_S))
-    {
-        playerMovement.y += speed * GetFrameTime();
-    }
-    if(IsKeyDown(KEY_A))
-    {
-        playerMovement.x -= speed * GetFrameTime();
-    }
-    if(IsKeyDown(KEY_D))
-    {
-        playerMovement.x += speed * GetFrameTime();
-    }
 }
