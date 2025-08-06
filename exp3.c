@@ -76,10 +76,12 @@ int main(void)
     skyboxShader.locs[SHADER_LOC_MAP_ALBEDO + 5] = GetShaderLocation(skyboxShader, "Left");
     
     //a making of an object
-    Shader diffuseShader = LoadShader("Vertex_Standard.vs", "Diffuse_Ambient.fs");
-    Model sphere = LoadModelFromMesh(GenMeshSphere(4,10,10));
+    Shader diffuseShader = LoadShader("Vertex_Standard.vs", "Diffuse_Specular.fs");
+    Model sphere = LoadModelFromMesh(GenMeshSphere(5,100,100));
     sphere.materials[0].shader = diffuseShader;
+    skyboxShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(diffuseShader, "viewPos");
     
+    printf("camera loc %d\n", skyboxShader.locs[SHADER_LOC_MATRIX_VIEW]);
     for(int i = 0 ; i < RL_MAX_SHADER_LOCATIONS ; i++)
     {
         if(skyboxShader.locs[i] != -1)
@@ -93,12 +95,19 @@ int main(void)
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
+        UpdateCamera(&camera, CAMERA_FREE);
+        
         BeginMode3D(camera);
-            UpdateCamera(&camera, CAMERA_FREE);
-            DrawModel(sphere, (Vector3){10.0f,10.0f,10.0f}, 4.0f, WHITE);
+            // BeginShaderMode(diffuseShader);
             
+                SetShaderValue(diffuseShader, skyboxShader.locs[SHADER_LOC_VECTOR_VIEW], &camera.position, SHADER_UNIFORM_VEC3);
+            
+                DrawModel(sphere, (Vector3){10.0f,10.0f,10.0f}, 1.0f, WHITE);
+                
+            // EndShaderMode();
+                
             rlDisableBackfaceCulling();
-            DrawModel(cube, (Vector3){0,0,0}, 100.0f, WHITE);
+            DrawModel(cube, (Vector3){0,0,0}, 1000.0f, WHITE);
             rlEnableBackfaceCulling();
         EndMode3D();
         
