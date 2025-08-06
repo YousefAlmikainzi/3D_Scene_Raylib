@@ -27,11 +27,11 @@ float saturation(float v)
 
 void main()
 {
-    vec3 ftFace = vec3(0.0, 0.0, 1.0);
+    vec3 ftFace = vec3(1.0, 0.0, 0.0);
     float ft = dot(o_normal, ftFace);
     float stFt = saturation(ft);
     
-    vec3 bkFace = vec3(0.0, 0.0, -1.0);
+    vec3 bkFace = vec3(-1.0, 0.0, 0.0);
     float bk = dot(o_normal, bkFace);
     float stBk = saturation(bk);
     
@@ -43,18 +43,18 @@ void main()
     float dn = dot(o_normal, dnFace);
     float stDn = saturation(dn);
     
-    vec3 rtFace = vec3(1.0, 0.0, 0.0);
+    vec3 rtFace = vec3(0.0, 0.0, 1.0);
     float rt = dot(o_normal, rtFace);
     float stRt = saturation(rt);
     
-    vec3 lfFace = vec3(-1.0, 0.0, 0.0);
+    vec3 lfFace = vec3(0.0, 0.0, -1.0);
     float lf = dot(o_normal, lfFace);
     float stLf = saturation(lf);
     
     vec4 ftTextured = texture(Front, o_uv);
     vec4 bkTextured = texture(Back, o_uv);
-    vec4 upTextured = texture(Up, o_uv);
-    vec4 dnTextured = texture(Down, o_uv);
+    vec4 upTextured = texture(Up, vec2(o_uv.x, 1 - o_uv.y));
+    vec4 dnTextured = texture(Down, vec2(1 - o_uv.x, o_uv.y));
     vec4 rtTextured = texture(Right, o_uv);
     vec4 lfTextured = texture(Left, o_uv);
 

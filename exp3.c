@@ -60,20 +60,25 @@ int main(void)
     Model cube = LoadModelFromMesh(GenMeshCube(1.0f, 1.0f, 1.0f));
     
     cube.materials[0].shader = skyboxShader;
+    cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = ftTexture;
+    cube.materials[0].maps[MATERIAL_MAP_ALBEDO + 1].texture = bkTexture;
+    cube.materials[0].maps[MATERIAL_MAP_ALBEDO + 2].texture = upTexture;
+    cube.materials[0].maps[MATERIAL_MAP_ALBEDO + 3].texture = dnTexture;
+    cube.materials[0].maps[MATERIAL_MAP_ALBEDO + 4].texture = rtTexture;
+    cube.materials[0].maps[MATERIAL_MAP_ALBEDO + 5].texture = lfTexture;
     
-    int floc = GetShaderLocation(skyboxShader, "Front");
-    int bloc = GetShaderLocation(skyboxShader, "Back");
-    int uloc = GetShaderLocation(skyboxShader, "Up");
-    int dloc = GetShaderLocation(skyboxShader, "Down");
-    int rloc = GetShaderLocation(skyboxShader, "Right");
-    int lloc = GetShaderLocation(skyboxShader, "Left");
     
-    printf("floc %d\n", floc);
-    printf("bloc %d\n", bloc);
-    printf("uloc %d\n", uloc);
-    printf("dloc %d\n", dloc);
-    printf("rloc %d\n", rloc);
-    printf("lloc %d\n", lloc);
+    skyboxShader.locs[SHADER_LOC_MAP_ALBEDO]     = GetShaderLocation(skyboxShader, "Front");
+    skyboxShader.locs[SHADER_LOC_MAP_ALBEDO + 1] = GetShaderLocation(skyboxShader, "Back");
+    skyboxShader.locs[SHADER_LOC_MAP_ALBEDO + 2] = GetShaderLocation(skyboxShader, "Up");
+    skyboxShader.locs[SHADER_LOC_MAP_ALBEDO + 3] = GetShaderLocation(skyboxShader, "Down");
+    skyboxShader.locs[SHADER_LOC_MAP_ALBEDO + 4] = GetShaderLocation(skyboxShader, "Right");
+    skyboxShader.locs[SHADER_LOC_MAP_ALBEDO + 5] = GetShaderLocation(skyboxShader, "Left");
+    
+    //a making of an object
+    Shader diffuseShader = LoadShader("Vertex_Standard.vs", "Diffuse_Ambient.fs");
+    Model sphere = LoadModelFromMesh(GenMeshSphere(4,10,10));
+    sphere.materials[0].shader = diffuseShader;
     
     for(int i = 0 ; i < RL_MAX_SHADER_LOCATIONS ; i++)
     {
@@ -90,20 +95,10 @@ int main(void)
         ClearBackground(BLACK);
         BeginMode3D(camera);
             UpdateCamera(&camera, CAMERA_FREE);
-            DrawCube((Vector3){10, 0, 10}, 10, 10, 10, YELLOW);
+            DrawModel(sphere, (Vector3){10.0f,10.0f,10.0f}, 4.0f, WHITE);
             
             rlDisableBackfaceCulling();
-            
-            SetShaderValueTexture(skyboxShader, floc, ftTexture);
-            SetShaderValueTexture(skyboxShader, bloc, bkTexture);
-
-            SetShaderValueTexture(skyboxShader, rloc, rtTexture);
-            SetShaderValueTexture(skyboxShader, lloc, lfTexture);
-
-            SetShaderValueTexture(skyboxShader, uloc, upTexture);
-            SetShaderValueTexture(skyboxShader, dloc, dnTexture);
-
-            DrawModel(cube, (Vector3){0,0,0}, 10.0f, WHITE);
+            DrawModel(cube, (Vector3){0,0,0}, 100.0f, WHITE);
             rlEnableBackfaceCulling();
         EndMode3D();
         

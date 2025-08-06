@@ -46,7 +46,7 @@ void main()
     vec4 rtTextured = texture(texture_4, o_uv);
     vec4 lfTextured = texture(texture_5, o_uv);
     
-    vec3 ftResult = ftTextured.xyz * ftFace;
+    vec3 ftResult = ftTextured.rbg * ftFace;
     vec3 bkResult = bkTextured.rgb * bkFace;
     vec3 upResult = upTextured.rgb * upFace;
     vec3 dnResult = dnTextured.rgb * dnFace;
