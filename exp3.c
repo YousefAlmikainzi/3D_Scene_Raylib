@@ -76,9 +76,13 @@ int main(void)
     skyboxShader.locs[SHADER_LOC_MAP_ALBEDO + 5] = GetShaderLocation(skyboxShader, "Left");
     
     //a making of an object
-    Shader diffuseShader = LoadShader("Vertex_Standard.vs", "Diffuse_Specular.fs");
+    char* grassPic = "textures/grass/grass.jpg";
+    Texture2D grassTexture = LoadTexture(grassPic);
+    
+    Shader diffuseShader = LoadShader("Vertex_Standard.vs", "Diffuse_Specular_Texture.fs");
     Model sphere = LoadModelFromMesh(GenMeshSphere(5,100,100));
     sphere.materials[0].shader = diffuseShader;
+    sphere.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = grassTexture;
     skyboxShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(diffuseShader, "viewPos");
     
     printf("camera loc %d\n", skyboxShader.locs[SHADER_LOC_MATRIX_VIEW]);
